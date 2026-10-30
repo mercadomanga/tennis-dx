@@ -62,7 +62,7 @@ MARIO_EYE = '#F0F0F0'
 OVERALLS = '#2850C8'        # on the chair
 CHAIR_TAN = '#D8A060'
 CHAIR_DARK = '#805020'
-CARD_BLUE = '#A0D0F8'       # FAULT / OUT card: background
+CARD_BLUE = '#8890E0'       # FAULT / OUT card: background
 BIB_BLUE = '#3060D0'        # FAULT / OUT card: overalls
 
 # Menus
