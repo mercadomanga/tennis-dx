@@ -1,0 +1,8 @@
+build/
+dist/
+baserom.gb
+*.gb
+*.gbc
+__pycache__/
+.ruff_cache/
+*.png
