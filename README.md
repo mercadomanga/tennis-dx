@@ -38,6 +38,10 @@ make test     # regression tests
 
 Colours are in `tools/palettes.py`. This repository contains nothing from the original game; its graphics are read from your `baserom.gb` at build time.
 
+## Super Game Boy (test branch)
+
+On a Super Game Boy (or SGB2) each level colours the whole screen with a palette of four colours: white, a light tone of its court, night blue and black. The players and Mario take the court's colour too, because the Super Game Boy colours screen areas, not sprites, and the court scrolls. On a Game Boy Color it is the DX version; on a classic Game Boy, the original. In BGB, choose *Options → System → GB type: SGB*.
+
 ## Disclaimer
 
 *Tennis* is a Nintendo game. This is a fan project, not affiliated with Nintendo. The game's ROM is not distributed.

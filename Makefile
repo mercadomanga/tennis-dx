@@ -38,7 +38,7 @@ build/main.o: $(SRC) build/data.inc build/baserom.ok
 
 $(ROM): build/main.o
 	rgblink -n build/tennis_dx.sym -m build/tennis_dx.map -p 0xFF -o $@ $<
-	rgbfix -c -m MBC5 -t "TENNIS" -v -p 0xFF $@
+	rgbfix -c -s -l 0x33 -k 01 -m MBC5 -t "TENNIS" -v -p 0xFF $@
 	$(PY) tools/check_rom.py $@ baserom.gb
 
 ips: build/tennis_dx.ips
@@ -68,7 +68,7 @@ audit: build/audit.gbc
 build/audit.gbc: $(SRC) build/data.inc build/baserom.ok
 	rgbasm -Wall -DVRAM_AUDIT -I src/ -I build/ -I ./ -o build/audit.o src/main.asm
 	rgblink -n build/audit.sym -o $@ build/audit.o
-	rgbfix -c -m MBC5 -t "TENNIS" -v -p 0xFF $@
+	rgbfix -c -s -l 0x33 -k 01 -m MBC5 -t "TENNIS" -v -p 0xFF $@
 
 clean:
 	rm -rf build dist .ruff_cache tools/__pycache__ tools/art/__pycache__

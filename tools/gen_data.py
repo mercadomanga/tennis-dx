@@ -682,6 +682,19 @@ def emit(f, s):
     f.write('\n')
 
 
+def emit_sgb(f):
+    """Super Game Boy: a PAL01 packet per level (palette 0 = palette 1)."""
+    from palettes import SGB_WHITE, SGB_STAND, SGB_SHADOW, SGB_SURFACE
+    f.write('\n; Super Game Boy: PAL01 packet of each level (16 bytes)\n')
+    f.write('SECTION "SgbPackets", ROMX, BANK[2]\nSgbPalPackets:\n')
+    for name in LEVELS:
+        cols = [SGB_WHITE, SGB_SURFACE[name], SGB_STAND, SGB_SHADOW]
+        pkt = [0x01] + [b for c in cols for b in rgb555(c)] + [b for c in cols[1:] for b in rgb555(c)] + [0]
+        assert len(pkt) == 16
+        f.write(f'    ; {name}\n')
+        db(f, pkt)
+
+
 def write(path):
     """Writes the include file the assembler reads."""
     with open(path, 'w') as f:
@@ -700,6 +713,7 @@ def write(path):
         for s in SCREENS:
             emit(f, s)
         emit_surfaces(f)
+        emit_sgb(f)
 
 
 if __name__ == '__main__':

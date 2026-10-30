@@ -13,8 +13,9 @@ ALLOWED = [
     (0x0032, 0x0038),   # SprHook2 (unused bytes)
     (0x0096, 0x009F),   # sprite builder 1 call
     (0x00E7, 0x0100),   # SprHook1 (unused bytes)
-    (0x0143, 0x0144),   # CGB flag
+    (0x0143, 0x0147),   # CGB flag, new licensee code, SGB flag
     (0x0147, 0x0149),   # cartridge type, ROM size
+    (0x014B, 0x014C),   # old licensee $33: the SGB flag counts
     (0x014D, 0x0150),   # checksums
     (0x01FC, 0x01FF),   # VBlank: OAM DMA call
     (0x0237, 0x023A),   # VBlank: end of the handler
@@ -32,6 +33,8 @@ if rom[0x7FE3:0x8000] != rom[0xBFE3:0xC000]:
     errors.append('bank 1 and bank 2 trampolines differ')
 if rom[0x143] != 0x80:
     errors.append('CGB flag is not $80 (GB + GBC)')
+if rom[0x146] != 0x03 or rom[0x14B] != 0x33:
+    errors.append('Super Game Boy flags missing ($146 = $03, $14B = $33)')
 if rom[0x147] != 0x19 or rom[0x148] != 0x01:
     errors.append('cartridge should be MBC5, 64 KiB')
 if len(rom) != 0x10000:

@@ -37,6 +37,9 @@ DEF wCardWX         EQU $D2FB   ; window x they were drawn for
 DEF wAuditLY        EQU $D2F0   ; VRAM / palette writes outside VBlank (LY < 144)
 DEF wAuditLCDOn     EQU $D2F1   ; screens left uncoloured because the LCD was already on
 DEF wAuditMinLY     EQU $D2F2   ; lowest LY seen at such a write in VBlank (144-153)
+DEF wSgbFound      EQU $D2F3   ; SGB_YES / SGB_NO once looked for (anything else: not yet)
+DEF SGB_YES         EQU $5A
+DEF SGB_NO          EQU $A5
 DEF wZoneTile       EQU $D2F4   ; dotted floor tile of this court (CourtTexture)
 DEF wZoneRows       EQU $D2F5   ; rows 11-15 (bits 0-4) of Mario's empty spot to dot, 0 = none
 DEF wZoneCol        EQU $D2F6   ; first column of that spot once known, 0 = not yet
@@ -59,6 +62,7 @@ DEF OVL_STATIC_MAX  EQU 24      ; entries
 DEF OVL_OFF         EQU 0
 DEF OVL_COURT       EQU 1       ; Mario moves with the camera, 2 rows of sprites
 DEF OVL_STATIC      EQU 2       ; fixed sprites (score-board Mario, title DX): wOvlBuf copied as is
+DEF OVL_SGB         EQU 3       ; Super Game Boy court: only the strip right of the FAULT / OUT card
 
 ; Overlay sprites use the highest OAM slots, but only while the game
 ; leaves them free (slot >= wOAMNext).

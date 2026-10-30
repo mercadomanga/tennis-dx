@@ -31,7 +31,10 @@ ELSE
     jr nz, .done            ; never touch VRAM with the LCD on
 ENDC
     call IsCGB
-    jr z, .done             ; DMG: nothing else to do (sprite tables stay 0)
+    jr nz, .cgb
+    call SgbScreen          ; DMG / Super Game Boy: the level's palette (sprite tables stay 0)
+    jr .done
+.cgb:
 
     call DetectScreen       ; b = block page
     call LoadPalettes
@@ -72,6 +75,130 @@ IsCGB:
     ldh [rVBK], a
     ldh a, [rVBK]
     inc a
+    ret
+
+; Super Game Boy: the palette of the current level for the whole screen
+; (one PAL01 packet; the attributes stay as the SGB starts: palette 0
+; everywhere), and on the court the strip right of the FAULT / OUT card
+; (OVL_SGB). A plain DMG is left as the original.
+SgbScreen:
+    call FindSgb
+    ret nz
+    ld a, [_SCRN0]
+    cp $82                  ; court (see DetectScreen)
+    jr nz, .notcourt
+    ld a, OVL_SGB
+    ld [wOvlMode], a
+.notcourt:
+    ld a, [wLevel]
+    dec a
+    cp 4
+    jr c, .level
+    xor a                   ; not a level yet (power on): LEVEL 1
+.level:
+    swap a                  ; * 16
+    ld e, a
+    ld d, 0
+    ld hl, SgbPalPackets
+    add hl, de
+    jp SgbSend
+
+; z = Super Game Boy. Looked for once: ask for two controllers and see
+; whether the joypad register starts answering for the second one.
+FindSgb:
+    ld a, [wSgbFound]
+    cp SGB_YES
+    ret z
+    cp SGB_NO
+    jr z, .no
+    ld hl, SgbMlt2
+    call SgbSend
+    call SgbWait
+    ld b, SGB_NO
+    ld c, 4                 ; a few reads after each change, as the docs advise
+.read:
+    ld a, $20               ; pulse P14 and P15: next controller
+    ldh [rP1], a
+    ldh a, [rP1]
+    ldh a, [rP1]
+    ld a, $30
+    ldh [rP1], a
+    ld a, $10
+    ldh [rP1], a
+    ldh a, [rP1]
+    ldh a, [rP1]
+    ldh a, [rP1]
+    ldh a, [rP1]
+    ld a, $30
+    ldh [rP1], a
+    ldh a, [rP1]
+    ldh a, [rP1]
+    ldh a, [rP1]
+    ldh a, [rP1]
+    and $03
+    cp $03
+    jr z, .next
+    ld b, SGB_YES           ; controller 2 answered ($E)
+.next:
+    dec c
+    jr nz, .read
+    ld a, b
+    ld [wSgbFound], a
+    cp SGB_YES
+    ret nz
+    ld hl, SgbMlt1          ; back to one controller
+    call SgbSend
+    call SgbWait
+    xor a                   ; z
+    ret
+.no:
+    or a                    ; nz
+    ret
+
+; About 4 frames: the SGB reads a packet only that often.
+SgbWait:
+    ld bc, 10500
+.loop:
+    dec bc
+    ld a, b
+    or c
+    jr nz, .loop
+    ret
+
+SgbMlt2:
+    db $89, $01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+SgbMlt1:
+    db $89, $00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+
+; In: hl -> 16-byte packet. Sent through the joypad register:
+; a 0 bit pulls P14 low, a 1 bit P15, each followed by both high.
+SgbSend:
+    xor a                   ; reset pulse
+    ldh [rP1], a
+    ld a, $30
+    ldh [rP1], a
+    ld b, 16
+.byte:
+    ld e, 8
+    ld d, [hl]
+    inc hl
+.bit:
+    ld a, $10
+    srl d
+    jr c, .one
+    ld a, $20
+.one:
+    ldh [rP1], a
+    ld a, $30
+    ldh [rP1], a
+    dec e
+    jr nz, .bit
+    dec b
+    jr nz, .byte
+    ld a, $20               ; stop bit (0)
+    ldh [rP1], a
+    ld a, $30
+    ldh [rP1], a
     ret
 
 ; Out: b = page of the screen's data block

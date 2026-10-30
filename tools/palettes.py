@@ -250,6 +250,16 @@ SURFACES = [
 FLOOR_DOTS = [(1, 2), (5, 0), (3, 5), (7, 6)]
 LEVELS = ['Tierra batida', 'Pista dura', 'Moqueta', 'Hierba']      # LEVEL 1, 2, 3, 4
 SURFACE = {sf['name']: sf for sf in SURFACES}
+
+# Super Game Boy: one palette per level for the whole screen, light to
+# dark as the DMG shades 0-3: floor (and eyes, CPU shirt) / court lines,
+# skin and ball / your shirt, net mesh, stands / outlines, hair, shadows.
+# Sprites and background share it: the SGB colours the finished picture.
+SGB_WHITE = '#F8F8F8'
+SGB_STAND = '#202838'
+SGB_SHADOW = '#101010'
+SGB_SURFACE = {'Tierra batida': '#C09078', 'Pista dura': '#7898C0',
+               'Moqueta': '#D08898', 'Hierba': '#88C080'}
 assert sorted(LEVELS) == sorted(SURFACE)
 
 

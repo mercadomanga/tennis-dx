@@ -173,6 +173,8 @@ OvlVBlank::
     ld a, [wOvlMode]
     and a
     jp z, hOAMDMA
+    cp OVL_SGB
+    jp z, hOAMDMA           ; Super Game Boy: no sprites of ours
     cp OVL_STATIC
     jr nz, .court
 
@@ -327,7 +329,9 @@ ENDR
 ; DMA'd by the next OvlVBlank.
 OvlEnd::
     ld a, [wOvlMode]
-    dec a                   ; OVL_COURT
+    cp OVL_SGB
+    jr z, .look
+    cp OVL_COURT
     jp nz, .out
     ld a, [wZoneRows]       ; dotted floor: once Mario is drawn, dot his empty spot
     and a
@@ -348,6 +352,7 @@ OvlEnd::
     ld [wZoneCol], a
     Todo TODO_ZONE
 .zoneok:
+.look:
     ld d, 0                 ; d = rows of the portrait on the window map
     ldh a, [hGameState]
     dec a                   ; the rally
@@ -371,6 +376,9 @@ OvlEnd::
     set 0, d
 .not2:
 .have:
+    ld a, [wOvlMode]
+    cp OVL_SGB
+    jp z, .sgbstrip
     ld a, d
     and a
     jp z, .cardoff
@@ -530,6 +538,25 @@ OvlEnd::
     xor a                   ; what the game does here
     ldh [hBusy], a
     ret
+
+; Super Game Boy: no sprites, the strip only (on while all three rows show).
+.sgbstrip:
+    ld a, [wCardMask]
+    ld e, a
+    ld a, d
+    ld [wCardMask], a
+    cp e
+    jr z, .out              ; no change
+    cp 7
+    jr z, .sgbon
+    ld a, e
+    cp 7
+    jr nz, .out
+    Todo TODO_STRIPOFF
+    jr .out
+.sgbon:
+    Todo TODO_STRIPON
+    jr .out
 
 ; Nothing of the card on the window map: hide what we drew.
 .cardoff:
