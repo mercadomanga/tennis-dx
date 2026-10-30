@@ -695,6 +695,63 @@ def emit_sgb(f):
         db(f, pkt)
 
 
+def emit_sgb_border(f):
+    """Super Game Boy border from tools/data/sgb_border.png (256 x 224, at most
+    15 colours plus magenta for the game's window; kept out of the repository).
+    Without the file the ROM has no border of its own."""
+    path = os.path.join(DATA, 'sgb_border.png')
+    if not os.path.exists(path):
+        return
+    from PIL import Image
+    im = Image.open(path).convert('RGB')
+    assert im.size == (256, 224), 'the border must be 256 x 224'
+    px = im.load()
+    clear = (255, 0, 255)
+    colours = sorted({px[x, y] for x in range(256) for y in range(224)} - {clear})
+    assert len(colours) <= 15, f'the border has {len(colours)} colours (15 at most)'
+    index = {c: i + 1 for i, c in enumerate(colours)}
+    index[clear] = 0
+    blank = tuple((0,) * 8 for _ in range(8))
+    tiles = [blank]
+    where = {blank: (0, 0)}
+    entries = []
+    for ty in range(28):
+        for tx in range(32):
+            t = tuple(tuple(index[px[tx * 8 + x, ty * 8 + y]] for x in range(8)) for y in range(8))
+            for flips, v in ((0, t), (0x40, tuple(r[::-1] for r in t)), (0x80, t[::-1]),
+                             (0xC0, tuple(r[::-1] for r in t[::-1]))):
+                if v in where:
+                    n, fl = where[v][0], flips
+                    break
+            else:
+                n, fl = len(tiles), 0
+                tiles.append(t)
+                where[t] = (n, 0)
+            entries.append((n, fl))
+    assert len(tiles) <= 128, f'{len(tiles)} tiles: one CHR_TRN holds 128'
+
+    def snes(t):
+        lo = []
+        hi = []
+        for row in t:
+            b = [sum(((p >> plane) & 1) << (7 - x) for x, p in enumerate(row)) for plane in range(4)]
+            lo += b[0:2]
+            hi += b[2:4]
+        return lo + hi
+    f.write(f'\n; Super Game Boy border: {len(tiles)} tiles, {len(colours)} colours (palette 4)\n')
+    f.write('DEF SGB_BORDER EQU 1\n')
+    f.write(f'DEF SGB_BORDER_TILES EQU {len(tiles)}\n')
+    f.write('SECTION "SgbBorder", ROMX, BANK[3]      ; read through FarCopy (colorize.asm)\nSgbBorderTiles:\n')
+    for t in tiles:
+        db(f, snes(t))
+    f.write('SgbBorderTilesEnd:\nSgbBorderMap:              ; 32 x 28 entries: tile, palette 4 and flips\n')
+    for n, fl in entries:
+        db(f, [n, 0x10 | fl])
+    f.write('SgbBorderMapEnd:\nSgbBorderPal:\n')
+    db(f, [0, 0] + [b for c in colours for b in rgb555('#%02X%02X%02X' % c)] + [0, 0] * (15 - len(colours)))
+    f.write('SgbBorderPalEnd:\n')
+
+
 def write(path):
     """Writes the include file the assembler reads."""
     with open(path, 'w') as f:
@@ -714,6 +771,7 @@ def write(path):
             emit(f, s)
         emit_surfaces(f)
         emit_sgb(f)
+        emit_sgb_border(f)
 
 
 if __name__ == '__main__':

@@ -13,6 +13,7 @@ ALLOWED = [
     (0x0032, 0x0038),   # SprHook2 (unused bytes)
     (0x0096, 0x009F),   # sprite builder 1 call
     (0x00E7, 0x0100),   # SprHook1 (unused bytes)
+    (0x0102, 0x0104),   # entry point: power-on hook (Super Game Boy border)
     (0x0143, 0x0147),   # CGB flag, new licensee code, SGB flag
     (0x0147, 0x0149),   # cartridge type, ROM size
     (0x014B, 0x014C),   # old licensee $33: the SGB flag counts

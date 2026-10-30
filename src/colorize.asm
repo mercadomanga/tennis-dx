@@ -17,6 +17,10 @@ ColorizeScreen::
     push bc
     push de
     push hl
+    ld hl, sp+0
+    ld a, h
+    inc a
+    jp z, PowerOn           ; stack still in HRAM: the jump at $0100, not the game
     call InstallOvlRoutine  ; on DMG too: there it only does the OAM DMA
     ldh a, [rLCDC]
     bit LCDCB_ON, a
@@ -154,6 +158,172 @@ FindSgb:
 .no:
     or a                    ; nz
     ret
+
+; Power on, from the jump at $0100 (bank 2 mapped, interrupts off, LCD on as
+; the boot ROM leaves it). On a Super Game Boy: send our border. Then start
+; the game as the cartridge did: $0150 with bank 1 mapped.
+PowerOn:
+IF DEF(SGB_BORDER)
+    call IsCGB
+    jr nz, .start
+    ld hl, FarCopyCode
+    ld de, FarCopy
+    ld c, FarCopyCodeEnd - FarCopyCode
+.far:
+    ld a, [hl+]
+    ld [de], a
+    inc de
+    dec c
+    jr nz, .far
+    call SgbWait            ; give the SGB a moment after power on
+    call SgbWait
+    xor a
+    ld [wSgbFound], a       ; RAM is random at power on
+    call FindSgb
+    call z, SgbBorder
+    xor a                   ; look again at the first screen (palettes), whatever we found
+    ld [wSgbFound], a
+ENDC
+.start:
+    ld sp, $FFFE
+    ld hl, StartStub
+    ld de, _RAM
+    ld c, StartStubEnd - StartStub
+.copy:
+    ld a, [hl+]
+    ld [de], a
+    inc de
+    dec c
+    jr nz, .copy
+    jp _RAM
+
+; Runs from WRAM: switching to bank 1 here would pull bank 2's code away.
+StartStub:
+    ld a, 1
+    ld [$2000], a
+    jp $0150
+StartStubEnd:
+
+IF DEF(SGB_BORDER)
+; The border goes through VRAM: the SGB copies what the screen shows, a
+; frame after the packet (tiles: CHR_TRN; map and palette: PCT_TRN).
+; The TV keeps the last picture meanwhile (MASK_EN freeze).
+SgbBorder:
+    ld hl, SgbMaskFreeze
+    call SgbSend
+    call SgbWait
+    call LcdOff
+    ld hl, _SCRN0           ; tiles 0-255 in reading order on the screen (20 x 13)
+    xor a
+    ld c, 13
+.row:
+    ld b, 20
+.col:
+    ld [hl+], a
+    inc a
+    dec b
+    jr nz, .col
+    ld de, 12
+    add hl, de
+    dec c
+    jr nz, .row
+    ld a, %11100100         ; shades as they are
+    ldh [rBGP], a
+    ; tiles
+    ld hl, _VRAM
+    ld bc, $1000
+    call Clear
+    ld hl, SgbBorderTiles
+    ld de, _VRAM
+    ld bc, SgbBorderTilesEnd - SgbBorderTiles
+    call FarCopy
+    ld hl, SgbChrTrn
+    call SgbTransfer
+    ; map and palette 4
+    ld hl, _VRAM
+    ld bc, $1000
+    call Clear
+    ld hl, SgbBorderMap
+    ld de, _VRAM
+    ld bc, SgbBorderMapEnd - SgbBorderMap
+    call FarCopy
+    ld hl, SgbBorderPal
+    ld de, _VRAM + $800
+    ld bc, SgbBorderPalEnd - SgbBorderPal
+    call FarCopy
+    ld hl, SgbPctTrn
+    call SgbTransfer
+    ; a blank screen for the game to start from
+    ld hl, _VRAM
+    ld bc, $2000
+    call Clear
+    ld a, LCDCF_ON | LCDCF_BGON
+    ldh [rLCDC], a
+    ld hl, SgbMaskOff
+    call SgbSend
+    jp SgbWait
+
+; In: hl -> packet. Shows the prepared VRAM, sends the packet, waits, LCD off.
+SgbTransfer:
+    ld a, LCDCF_ON | LCDCF_BG8000 | LCDCF_BGON
+    ldh [rLCDC], a
+    push hl
+    call SgbWait
+    pop hl
+    call SgbSend
+    call SgbWait
+    call SgbWait
+LcdOff:
+    ldh a, [rLCDC]
+    bit LCDCB_ON, a
+    ret z
+.wait:
+    ldh a, [rLY]
+    cp 144
+    jr c, .wait
+    xor a
+    ldh [rLCDC], a
+    ret
+
+; hl = destination, bc = bytes
+Clear:
+    xor a
+    ld [hl+], a
+    dec bc
+    ld a, b
+    or c
+    jr nz, Clear
+    ret
+
+; hl = source in bank 3 (the border), de = destination, bc = bytes.
+; Copied to WRAM at power on and run from there: switching banks here
+; would pull this code away.
+DEF FarCopy EQU _RAM + $10
+FarCopyCode:
+    ld a, BANK(SgbBorderTiles)
+    ld [$2000], a
+.loop:
+    ld a, [hl+]
+    ld [de], a
+    inc de
+    dec bc
+    ld a, b
+    or c
+    jr nz, .loop
+    ld a, BANK(@)
+    ld [$2000], a
+    ret
+FarCopyCodeEnd:
+
+SgbMaskFreeze:
+    db $B9, $01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+SgbMaskOff:
+    db $B9, $00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+SgbChrTrn:                  ; border tiles $00-$7F
+    db $99, $00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+SgbPctTrn:
+    db $A1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+ENDC
 
 ; About 4 frames: the SGB reads a packet only that often.
 SgbWait:

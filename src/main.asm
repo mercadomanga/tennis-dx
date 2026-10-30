@@ -6,8 +6,8 @@ INCLUDE "hardware.inc"
 INCLUDE "defs.inc"
 
 INCLUDE "bank0.asm"
-INCLUDE "colorize.asm"
 INCLUDE "data.inc"
+INCLUDE "colorize.asm"
 INCLUDE "vblank.asm"
 
 ASSERT wOvlRAM + (OvlROMEnd - OvlROM) <= $DD00, "VBlank routine runs into the game's WRAM"

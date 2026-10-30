@@ -80,7 +80,11 @@ SprAttr:
     ret
 
 SECTION "rom0_0100", ROM0[$0100]
-    INCBIN "baserom.gb", $0100, VBlank_DMACall - $0100
+    nop                     ; power on: through the bank trampoline (ColorizeScreen
+    jp LCDOnHook1           ; sees the boot stack), then the game's own start at $0150
+
+SECTION "rom0_0104", ROM0[$0104]
+    INCBIN "baserom.gb", $0104, VBlank_DMACall - $0104
 
 SECTION "rom0_VBlankDMA", ROM0[VBlank_DMACall]
     call OvlVBlank          ; Mario's overlay sprites, then the OAM DMA

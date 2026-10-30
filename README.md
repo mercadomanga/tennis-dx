@@ -42,6 +42,10 @@ Colours are in `tools/palettes.py`. This repository contains nothing from the or
 
 On a Super Game Boy (or SGB2) each level colours the whole screen with a palette of four colours: white, a light tone of its court, night blue and black. The players and Mario take the court's colour too, because the Super Game Boy colours screen areas, not sprites, and the court scrolls. On a Game Boy Color it is the DX version; on a classic Game Boy, the original. In BGB, choose *Options → System → GB type: SGB*.
 
+## Super Game Boy border (local)
+
+If `tools/data/sgb_border.png` exists (256 x 224, at most 15 colours, magenta for the game's window), the ROM sends it to the Super Game Boy at power on. Without it the ROM has no border of its own.
+
 ## Disclaimer
 
 *Tennis* is a Nintendo game. This is a fan project, not affiliated with Nintendo. The game's ROM is not distributed.
