@@ -3,8 +3,9 @@
 
 run_tests.py PATCHED.gbc ORIGINAL.gb [--shots DIR]
 
-1. DMG: with the same button presses, the patched ROM must draw exactly
-   the same frames as the original on a monochrome Game Boy.
+1. DMG: with the same button presses, the patched ROM must draw the same
+   frames as the original on a monochrome Game Boy, but for the CPU's eyes
+   and shoes, now white: any pixel that differs must be white.
 2. GBC: a bot plays through every screen (title, level select, score
    board, court, changing ends, end of match); checks that each screen is
    recognised and coloured, and that Mario's overlay sprites line up.
@@ -90,7 +91,7 @@ class Bot:
 # from the timer, so a long rally plays out differently. What must not
 # change is the picture: every screen the game builds (title, level
 # select, score board, court) is captured shortly after it appears.
-print('DMG: every screen must look exactly like the original')
+print('DMG: every screen must look like the original (the CPU\'s eyes and shoes now white)')
 
 
 def dmg_screens(rom):
@@ -106,15 +107,23 @@ def dmg_screens(rom):
         if on and not last_on:
             pb.tick(40, True)
             f += 40
-            shots.append(pb.screen.ndarray.tobytes())
+            shots.append(pb.screen.ndarray[:, :, :3].copy())
         last_on = on
     pb.stop(False)
     return shots
 
 
 orig, patched = dmg_screens(args.base), dmg_screens(args.rom)
-check(len(orig) >= 5 and orig == patched,
-      f'DMG screens identical ({sum(x == y for x, y in zip(orig, patched))}/{len(orig)})')
+white = orig[0][0, 0]                   # the title's top left corner is paper
+
+
+def same_or_white(a, b):
+    diff = (a != b).any(axis=2)
+    return (b[diff] == white).all()
+
+
+check(len(orig) >= 5 and len(orig) == len(patched) and all(same_or_white(a, b) for a, b in zip(orig, patched)),
+      f'DMG screens: the same but for white pixels ({sum((a == b).all() for a, b in zip(orig, patched))}/{len(orig)} identical)')
 
 # ------------------------------------------------------------------ 2. GBC
 print('GBC: play through every screen')

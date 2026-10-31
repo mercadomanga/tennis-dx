@@ -5,8 +5,8 @@ Versión a color del *Tennis* de Game Boy (Nintendo, 1989), al estilo de las edi
 Una sola ROM vale para todo:
 
 - **Game Boy Color:** la versión DX a color.
-- **Super Game Boy y SGB2:** una paleta por nivel y el borde de Game Boy clásica.
-- **Game Boy clásica:** idéntica al cartucho original.
+- **Super Game Boy y SGB2:** una paleta por nivel y el borde de Game Boy clásica, con los mismos arreglos que en la Game Boy clásica.
+- **Game Boy clásica:** como el cartucho original, con dos arreglos: los ojos y las zapatillas del rival ya no son transparentes, y el cartel de FAULT / OUT llena su franja derecha.
 
 ## Qué incluye
 

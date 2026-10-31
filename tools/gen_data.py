@@ -682,6 +682,29 @@ def emit(f, s):
     f.write('\n')
 
 
+# Sprite tiles of your player on the court (OBP0), seen in play: the CPU's
+# eyes and shoes are made white on a DMG only in the tiles it does not share.
+YOU_COURT_TILES = {0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x22, 0x2F,
+                   0x30, 0x31, 0x32, 0x33, 0x34, 0x37, 0x38, 0x3D, 0x3E, 0x3F} | set(range(0x40, 0x6C)) | {0x97, 0x98, 0x99}
+
+
+def emit_dmg_white(f):
+    """DMG / SGB: the CPU's transparent eyes and shoes in colour 2 (white in OBP1)."""
+    rows = defaultdict(int)
+    for name in ('eyes.json', 'shoes.json'):
+        for k, pix in load(name, 'r').items():
+            scr, t, obp = k.split()
+            t = int(t, 16)
+            if scr == 'court' and obp == '16' and t not in YOU_COURT_TILES:
+                for row, col, *_ in pix:
+                    rows[(t, row)] |= 0x80 >> col
+    f.write('\n; DMG / SGB, court: the CPU\'s eyes and shoes. Count, then (tile, row, pixels)\n')
+    f.write('SECTION "DmgWhite", ROMX, BANK[2]\nDmgWhiteCourt:\n')
+    f.write(f'    db {len(rows)}\n')
+    for (t, row), mask in sorted(rows.items()):
+        db(f, [t, row, mask])
+
+
 def emit_sgb(f):
     """Super Game Boy: a PAL01 packet per level (palette 0 = palette 1)."""
     from palettes import SGB_WHITE, SGB_STAND, SGB_SHADOW, SGB_SURFACE
@@ -766,6 +789,7 @@ def write(path):
         for s in SCREENS:
             emit(f, s)
         emit_surfaces(f)
+        emit_dmg_white(f)
         emit_sgb(f)
         emit_sgb_border(f)
 

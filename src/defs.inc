@@ -62,7 +62,7 @@ DEF OVL_STATIC_MAX  EQU 24      ; entries
 DEF OVL_OFF         EQU 0
 DEF OVL_COURT       EQU 1       ; Mario moves with the camera, 2 rows of sprites
 DEF OVL_STATIC      EQU 2       ; fixed sprites (score-board Mario, title DX): wOvlBuf copied as is
-DEF OVL_SGB         EQU 3       ; Super Game Boy court: only the strip right of the FAULT / OUT card
+DEF OVL_DMG         EQU 3       ; DMG / Super Game Boy court: only the strip right of the FAULT / OUT card
 
 ; Overlay sprites use the highest OAM slots, but only while the game
 ; leaves them free (slot >= wOAMNext).

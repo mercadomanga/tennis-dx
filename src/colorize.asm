@@ -38,7 +38,7 @@ ELSE
 ENDC
     call IsCGB
     jr nz, .cgb
-    call SgbScreen          ; DMG / Super Game Boy: the level's palette (sprite tables stay 0)
+    call DmgScreen          ; DMG / Super Game Boy (sprite tables stay 0)
     jr .done
 .cgb:
 
@@ -83,19 +83,24 @@ IsCGB:
     inc a
     ret
 
-; Super Game Boy: the palette of the current level for the whole screen
-; (one PAL01 packet; the attributes stay as the SGB starts: palette 0
-; everywhere), and on the court the strip right of the FAULT / OUT card
-; (OVL_SGB). A plain DMG is left as the original.
-SgbScreen:
-    call FindSgb
-    ret nz
+; DMG and Super Game Boy (the game's own shades). On the court, the CPU's
+; eyes and shoes get their white: they were transparent, and its sprite
+; palette (OBP1) shows colour 2 as white (only in the tiles your player never
+; uses: your palette, OBP0, has no white). And the strip right of the
+; FAULT / OUT card (OVL_DMG). On a Super Game Boy,
+; also the palette of the current level for the whole screen (one PAL01
+; packet; the attributes stay as the SGB starts: palette 0 everywhere).
+DmgScreen:
     ld a, [_SCRN0]
     cp $82                  ; court (see DetectScreen)
-    jr nz, .notcourt
-    ld a, OVL_SGB
+    jr nz, .sgb
+    ld a, OVL_DMG
     ld [wOvlMode], a
-.notcourt:
+    ld hl, DmgWhiteCourt
+    call DmgWhite
+.sgb:
+    call FindSgb
+    ret nz
     ld a, [wLevel]
     dec a
     cp 4
@@ -108,6 +113,44 @@ SgbScreen:
     ld hl, SgbPalPackets
     add hl, de
     jp SgbSend
+
+; hl -> db count, then count * (db sprite tile, row, pixels): the pixels
+; that are transparent in that row become colour 2 (VRAM bank 0, LCD off).
+DmgWhite:
+    ld a, [hl+]
+    and a
+    ret z
+    ld c, a
+.pixel:
+    ld a, [hl+]             ; tile -> de = $8000 + tile * 16 + row * 2
+    ld e, a
+    swap a
+    and $0F
+    or $80
+    ld d, a
+    ld a, e
+    swap a
+    and $F0
+    ld e, a
+    ld a, [hl+]
+    add a
+    add e
+    ld e, a
+    ld a, [de]              ; low plane
+    ld b, a
+    inc de
+    ld a, [de]              ; high plane
+    or b
+    cpl
+    and [hl]                ; wanted pixels that are colour 0
+    inc hl
+    ld b, a
+    ld a, [de]
+    or b
+    ld [de], a
+    dec c
+    jr nz, .pixel
+    ret
 
 ; z = Super Game Boy. Looked for once: ask for two controllers and see
 ; whether the joypad register starts answering for the second one.

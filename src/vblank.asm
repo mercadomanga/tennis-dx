@@ -173,7 +173,7 @@ OvlVBlank::
     ld a, [wOvlMode]
     and a
     jp z, hOAMDMA
-    cp OVL_SGB
+    cp OVL_DMG
     jp z, hOAMDMA           ; Super Game Boy: no sprites of ours
     cp OVL_STATIC
     jr nz, .court
@@ -329,7 +329,7 @@ ENDR
 ; DMA'd by the next OvlVBlank.
 OvlEnd::
     ld a, [wOvlMode]
-    cp OVL_SGB
+    cp OVL_DMG
     jr z, .look
     cp OVL_COURT
     jp nz, .out
@@ -377,7 +377,7 @@ OvlEnd::
 .not2:
 .have:
     ld a, [wOvlMode]
-    cp OVL_SGB
+    cp OVL_DMG
     jp z, .sgbstrip
     ld a, d
     and a
