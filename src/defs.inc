@@ -37,12 +37,16 @@ DEF wCardWX         EQU $D2FB   ; window x they were drawn for
 DEF wAuditLY        EQU $D2F0   ; VRAM / palette writes outside VBlank (LY < 144)
 DEF wAuditLCDOn     EQU $D2F1   ; screens left uncoloured because the LCD was already on
 DEF wAuditMinLY     EQU $D2F2   ; lowest LY seen at such a write in VBlank (144-153)
+DEF wZoneTile       EQU $D2F4   ; dotted floor tile of this court (CourtTexture)
+DEF wZoneRows       EQU $D2F5   ; rows 11-15 (bits 0-4) of Mario's empty spot to dot, 0 = none
+DEF wZoneCol        EQU $D2F6   ; first column of that spot once known, 0 = not yet
 DEF wOvlLim         EQU $D2F8   ; court overlay: sprites right of this x are hidden by the window
 DEF wCardTodo       EQU $D2F9   ; TODO_xx bits: work for the next OvlVBlank
 DEF TODO_PALCARD    EQU 0       ; load the card's colours into OBJ palette 5
 DEF TODO_PALNORM    EQU 1       ; ...and give it back
 DEF TODO_STRIPON    EQU 2       ; strip right of the card: card background
 DEF TODO_STRIPOFF   EQU 3       ; ...blank again
+DEF TODO_ZONE       EQU 4       ; dotted floor where Mario is not (wZoneCol)
 DEF wOvlStaticDst   EQU $D2FC   ; OVL_STATIC: low byte of the first shadow OAM slot used
 DEF wOvlStaticLen   EQU $D2FD   ; OVL_STATIC: bytes to copy (multiple of 4)
 DEF wOvlCount       EQU $D2FE   ; row counter used by that routine

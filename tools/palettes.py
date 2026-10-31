@@ -234,14 +234,20 @@ for col in (22, 3):
 # the court, the one that tells the surfaces apart) and wall: BG 3, 4 and 7
 # and the wall behind Mario's shirt (OBJ 5, 6).
 SURFACES = [
-    dict(name='Hierba', grass=True),
-    dict(name='Tierra batida', inside='#D07848', outside='#D07848', mesh='#A85430',
+    dict(name='Hierba', grass=True, texture=0b11001),
+    dict(name='Tierra batida', texture=0b11111, inside='#D07848', outside='#D07848', mesh='#A85430',
          wall='#2E6B48', wall_d='#1E4A30', slope='#A85430', net='#3A1C10'),
     dict(name='Pista dura', inside='#3060A8', outside='#50A0D8', mesh='#50A0D8',
          wall='#203C70', wall_d='#142850', slope='#3878B8', net='#101830'),
     dict(name='Moqueta', inside='#68B878', outside='#C05068', mesh='#C05068',
          wall='#4A2838', wall_d='#301824', slope='#983850', net='#182818'),
 ]
+# texture: the plain floor gets a few dots of colour 2 of its palette (the
+# mesh on clay, the dark stripe on grass, where only the light rows show them).
+# Mario's empty spot (rows 11-15) is dotted too, in the rows given here as
+# bits 0-4: all of them on clay; on grass rows 12-13 are a dark stripe.
+# (x, y) of the dots in each 8 x 8 floor tile:
+FLOOR_DOTS = [(1, 2), (5, 0), (3, 5), (7, 6)]
 LEVELS = ['Tierra batida', 'Pista dura', 'Moqueta', 'Hierba']      # LEVEL 1, 2, 3, 4
 SURFACE = {sf['name']: sf for sf in SURFACES}
 assert sorted(LEVELS) == sorted(SURFACE)

@@ -202,7 +202,10 @@ ENDR
     ; ---- court: Mario's body (2 x 2 tiles) follows the camera
 .court:
     ld a, [_SCRN0 + 11 * 32 + 22]   ; Mario on the right (or left after changing ends)
-    cp $80
+    cp BLANK_TILE
+    jp z, .left
+    ld hl, wZoneTile        ; his empty spot may show the dotted floor
+    cp [hl]
     jp z, .left
     MarioBody 22
     jp hOAMDMA
@@ -229,10 +232,57 @@ ENDR
     call .stripfill
 .t3:
     bit TODO_STRIPOFF, b
-    jp z, .dispatch
+    jr z, .t4
     ld a, BLANK_TILE        ; give the strip back
     call .stripfill
+.t4:
+    bit TODO_ZONE, b
+    call nz, .zonefill
     jp .dispatch
+
+; The spot Mario left empty (2 cells wide, rows 11-15): dotted floor tile
+; with palette 0 in the rows of wZoneRows that still show the plain floor.
+.zonefill:
+    ld a, [wZoneCol]
+    ld e, a
+    ld d, 0
+    ld hl, _SCRN0 + 11 * 32
+    add hl, de
+    ld a, [wZoneRows]
+    ld b, a
+    ld c, 5
+.zrow:
+    srl b
+    jr nc, .znext
+    push hl
+    call .zcell
+    inc hl
+    call .zcell
+    pop hl
+.znext:
+    ld de, 32
+    add hl, de
+    dec c
+    jr nz, .zrow
+    xor a
+    ldh [rVBK], a
+    ret
+
+.zcell:
+    xor a
+    ldh [rVBK], a
+    ld a, [hl]
+    cp BLANK_TILE
+    ret nz
+    ld a, [wZoneTile]
+    AuditVBlank
+    ld [hl], a
+    ld a, 1
+    ldh [rVBK], a
+    xor a                   ; palette 0, bank 0
+    AuditVBlank
+    ld [hl], a
+    ret
 
 ; a = tile for the 5 window cells right of the card
 .stripfill:
@@ -279,6 +329,25 @@ OvlEnd::
     ld a, [wOvlMode]
     dec a                   ; OVL_COURT
     jp nz, .out
+    ld a, [wZoneRows]       ; dotted floor: once Mario is drawn, dot his empty spot
+    and a
+    jr z, .zoneok
+    ld a, [wZoneCol]
+    and a
+    jr nz, .zoneok
+    ReadVRAM _SCRN0 + 11 * 32 + 22
+    ld e, 3                 ; Mario on the right: the left spot is empty
+    cp BLANK_TILE
+    jr nz, .zoneset
+    ReadVRAM _SCRN0 + 11 * 32 + 3
+    ld e, 22
+    cp BLANK_TILE
+    jr z, .zoneok           ; not drawn yet
+.zoneset:
+    ld a, e
+    ld [wZoneCol], a
+    Todo TODO_ZONE
+.zoneok:
     ld d, 0                 ; d = rows of the portrait on the window map
     ldh a, [hGameState]
     dec a                   ; the rally

@@ -437,7 +437,7 @@ assert len(menu.static) <= 24, 'too many DX sprites'
 # chair without crossing a line. A tile used on both sides of the court
 # needs two different copies: the extra ones go to tile numbers the court
 # never uses, and those cells of the map are pointed at them.
-from palettes import SURFACES, SURFACE, LEVELS, surface_palettes, surface_board   # noqa: E402
+from palettes import SURFACES, SURFACE, LEVELS, FLOOR_DOTS, surface_palettes, surface_board   # noqa: E402
 
 
 def court_inout():
@@ -502,6 +502,41 @@ def court_inout():
             out.append((dest, t, rows))
             remaps += [(SCRN0 + c, dest) for c in where]
     return out, remaps, sorted(cells)
+
+
+def court_texture(taken):
+    """(tiles [(dest, 16 bytes)], runs [(map address, length, tile)]): a dotted
+    copy of each plain floor tile (palette 0, all colour 0) in a spare tile
+    number not in `taken`, and the cells that show it."""
+    tmap = load('map_court.bin')
+    tiles = Tiles(load('bg_court.bin'), signed=True)
+    pal = [court.bg.get(t, 0) & 7 for t in tmap]
+    for addr, width, p in court.rects:
+        if SCRN0 <= addr < SCRN0 + 0x400:
+            for c in range(width):
+                pal[addr - SCRN0 + c] = p & 7
+    plain = sorted({t for cell, t in enumerate(tmap) if pal[cell] == 0
+                    and all(tiles.px(t, y, x) == 0 for y in range(8) for x in range(8))})
+    # a tile number nothing uses: blank in VRAM, not on the map, not drawn
+    # later (Mario's tiles are not on the map yet but have their graphics)
+    spare = [t for t in range(0xFF, 0x7F, -1) if t not in tmap and t not in taken
+             and not any(tiles.px(t, y, x) for y in range(8) for x in range(8))]
+    assert len(spare) >= len(plain) == 1, 'one plain floor tile and a free tile for its dotted copy'
+    dest = {t: spare.pop(0) for t in plain}
+    data = []
+    for t in plain:
+        rows = [0] * 8
+        for x, y in FLOOR_DOTS:
+            rows[y] |= 0x80 >> x
+        data.append((dest[t], [b for r in rows for b in (0, r)]))     # colour 2: high plane only
+    runs = []
+    for cell, t in enumerate(tmap):
+        if pal[cell] == 0 and t in dest:
+            if runs and runs[-1][0] + runs[-1][1] == SCRN0 + cell and runs[-1][2] == dest[t] and cell % 32:
+                runs[-1][1] += 1
+            else:
+                runs.append([SCRN0 + cell, 1, dest[t]])
+    return data, runs
 
 
 SCRN0 = 0x9800
@@ -582,6 +617,17 @@ def emit_surfaces(f):
         f.write(f'    dw ${addr:04X}\n    db ${t:02X}\n')
     f.write('    ; cells drawn from bank 1: runs of (address, length), 0 ends\n')
     emit_runs(f, cells)
+    f.write('LevelTexture:      ; LEVEL 1-4: dotted floor (palettes.py, FLOOR_DOTS)\n')
+    db(f, [SURFACE[name].get('texture', 0) for name in LEVELS])
+    data, runs = court_texture({dest for dest, _, _ in tiles})
+    f.write('FloorDots:\n    ; tiles: count, then (tile, 16 bytes)\n')
+    f.write(f'    db {len(data)}\n')
+    for t, b in data:
+        db(f, [t] + b)
+    f.write('    ; cells: runs of (address, length, tile), 0 ends\n')
+    for addr, n, t in runs:
+        f.write(f'    dw ${addr:04X}\n    db {n}, ${t:02X}\n')
+    f.write('    dw 0\n')
     tiles, cells = crowd_clothes()
     f.write('CrowdClothes:\n    ; bank-1 tiles: count, then (tile, rows of clothes to turn into colour 0)\n')
     f.write(f'    db {len(tiles)}\n')

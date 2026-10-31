@@ -16,7 +16,7 @@ Colorización para Game Boy Color del *Tennis* de Game Boy (Nintendo, 1989), al 
 
 ## Qué incluye
 
-- Una pista por nivel: tierra batida, pista dura, moqueta y hierba.
+- Una pista por nivel: tierra batida, pista dura, moqueta y hierba (tierra batida y hierba con el suelo punteado).
 - Color en los jugadores, el público, Mario árbitro, el marcador y la pelota.
 - Funciona en partidas de 2 jugadores por cable link.
 

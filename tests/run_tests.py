@@ -139,7 +139,7 @@ for f in range(args.frames):
     last_on = on
     # Mario's overlay: the 4 court sprites must sit exactly on his tiles
     if f % 97 == 0 and on and m[0x9800] == 0x82 and m[0xD2FF] == 1 and not m[0xFF40] & 0x20:
-        col = 22 if m[0x9800 + 11 * 32 + 22] != 0x80 else 3
+        col = 22 if m[0x9800 + 11 * 32 + 22] not in (0x80, m[0xD2F4]) else 3
         y = (12 * 8 - m[0xFF42] + 16) & 0xFF
         x = (col * 8 - m[0xFF43] + 8) & 0xFF
         if m[0xDEA0] <= 0x90:
@@ -359,7 +359,7 @@ for f in range(40000):
         continue
     win = m[0xFFA6] & 0x20
     cards += bool(win and m[0x9C00 + 4 * 32 + 1] == 0xB3)
-    col = 22 if m[0x9800 + 11 * 32 + 22] != 0x80 else 3
+    col = 22 if m[0x9800 + 11 * 32 + 22] not in (0x80, m[0xD2F4]) else 3
     ends.add(col)
     mx, my = (col * 8 - m[0xFFA8]) & 0xFF, (12 * 8 - m[0xFFAA]) & 0xFF
     if mx <= 144 and my <= 128 and not (win and m[0xFFAC] < my + 16 and m[0xFFAB] - 7 < mx + 16):

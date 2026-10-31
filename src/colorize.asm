@@ -103,6 +103,11 @@ InstallOvlRoutine:
     ld [wOvlMode], a
     ld [wCardMask], a
     ld [wCardTodo], a
+    ld [wZoneRows], a
+    ld [wZoneCol], a
+    ld a, BLANK_TILE
+    ld [wZoneTile], a       ; (the empty spot reads as floor either way)
+    xor a
     ld hl, wOvlSlot
 .clear:
     ld [hl+], a
@@ -179,6 +184,7 @@ ApplyAttributes:
 ; it from VRAM bank 1.
 ; Out: VBK = 1
 CourtSurface:
+    call CourtTexture
     call SurfaceOfLevel
     jp z, CourtStripes
     push bc
@@ -212,6 +218,66 @@ CourtSurface:
     ldh [rVBK], a
     pop bc
     ret
+
+; Dotted floor on the levels that have it (LevelTexture): a copy of the
+; plain floor tile with a few dots of colour 2 in a spare tile number, and
+; the floor cells pointed at it. Before the grass stripes, so their bank-1
+; copies (colour 0 -> 2) keep the dark rows plain. Mario's two spots get
+; their palettes from fixed rectangles and he is drawn after this: the spot
+; he leaves empty is dotted later, in VBlank (wZoneRows, TODO_ZONE).
+CourtTexture:
+    ld a, [wLevel]
+    dec a
+    cp 4
+    ret nc
+    ld e, a
+    ld d, 0
+    ld hl, LevelTexture
+    add hl, de
+    ld a, [hl]
+    and a
+    ret z
+    ld [wZoneRows], a
+    xor a
+    ldh [rVBK], a
+    ld hl, FloorDots
+    ld a, [hl+]
+    push af
+    ld a, [hl]
+    ld [wZoneTile], a       ; the first (only) dotted tile
+    pop af
+.tile:
+    and a
+    jr z, .cells
+    push af
+    ld a, [hl+]
+    call BGTileAddr
+    ld c, 16
+.copy:
+    ld a, [hl+]
+    ld [de], a
+    inc de
+    dec c
+    jr nz, .copy
+    pop af
+    dec a
+    jr .tile
+.cells:
+    ld a, [hl+]
+    ld e, a
+    ld a, [hl+]
+    ld d, a
+    or e
+    ret z
+    ld a, [hl+]
+    ld c, a
+    ld a, [hl+]
+.fill:
+    ld [de], a
+    inc de
+    dec c
+    jr nz, .fill
+    jr .cells
 
 ; Out: hl -> surface entry of the level (its kind byte), z = grass
 SurfaceOfLevel:

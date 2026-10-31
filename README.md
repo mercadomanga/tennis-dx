@@ -16,7 +16,7 @@ A Game Boy Color colorization of *Tennis* for the Game Boy (Nintendo, 1989), in 
 
 ## Features
 
-- One court per level: clay, hard court, carpet and grass.
+- One court per level: clay, hard court, carpet and grass (clay and grass with a dotted floor).
 - Coloured players, crowd, Mario the umpire, score box and ball.
 - Works in 2-player games over the link cable.
 
