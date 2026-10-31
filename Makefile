@@ -1,4 +1,5 @@
-# Tennis DX
+# Tennis DX: Game Boy Color colours, Super Game Boy palettes and border,
+# and the original game on a classic Game Boy, in one ROM.
 #   make          build build/tennis_dx.gbc
 #   make test     regression tests (needs: pip install pyboy pillow)
 #   make audit    build/audit.gbc: the ROM plus counters of VRAM writes outside VBlank (used by make test)
@@ -23,13 +24,13 @@ build/baserom.ok: baserom.gb
 	@touch $@
 
 # Tile snapshots of the original game, taken from your own baserom.gb
-# (they are not stored in the repository).
+# (they are not kept with the source).
 VRAM := build/vram/spr_court.bin build/vram/spr_board.bin build/vram/bg_court.bin build/vram/bg_board.bin build/vram/map_court.bin
 
 $(VRAM) &: baserom.gb build/baserom.ok tools/dump_vram.py
 	$(PY) tools/dump_vram.py baserom.gb build/vram
 
-build/data.inc: tools/gen_data.py tools/palettes.py tools/art/dx_logo.py $(wildcard tools/data/*.json) $(wildcard tools/data/sgb_border.png) $(VRAM)
+build/data.inc: tools/gen_data.py tools/palettes.py tools/art/dx_logo.py $(wildcard tools/data/*.json) tools/data/sgb_border.png $(VRAM)
 	@mkdir -p build
 	$(PY) tools/gen_data.py $@ build/vram
 
@@ -51,12 +52,12 @@ test: $(ROM) build/audit.gbc
 lint:
 	ruff check --select E,F,W --ignore E501 tools tests
 
-# Everything worth sharing; the original game is never included.
+# ROM, patch and source (without the original game).
 dist: $(ROM) build/tennis_dx.ips
 	rm -rf dist && mkdir -p dist
 	cp $(ROM) "dist/Tennis DX.gbc"
 	cp build/tennis_dx.ips dist/tennis_dx.ips
-	zip -qr dist/tennis-dx-src.zip . -x 'build/*' 'dist/*' 'baserom.gb' '*.gb' '*.gbc' '*.png' '*__pycache__/*' '.ruff_cache/*'
+	zip -qr dist/tennis-dx-src.zip . -x 'build/*' 'dist/*' 'baserom.gb' '*.gb' '*.gbc' '*__pycache__/*' '.ruff_cache/*'
 
 # Every pose of both players, as a picture (the game's graphics: stays in build/)
 poses: build/poses.png

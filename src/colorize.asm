@@ -8,6 +8,8 @@
 ;   3. write a BG attribute for every map cell from its tile number,
 ;   4. apply per-screen extras (the court's surface, fixed rectangles,
 ;      pixel patches, Mario's overlay sprites).
+; On a DMG or Super Game Boy it only sends the SGB the level's palette; at
+; power on it also sends the SGB its border (PowerOn).
 
 SECTION "Colorize", ROMX, BANK[2]
 
@@ -163,7 +165,6 @@ FindSgb:
 ; the boot ROM leaves it). On a Super Game Boy: send our border. Then start
 ; the game as the cartridge did: $0150 with bank 1 mapped.
 PowerOn:
-IF DEF(SGB_BORDER)
     call IsCGB
     jr nz, .start
     ld hl, FarCopyCode
@@ -183,7 +184,6 @@ IF DEF(SGB_BORDER)
     call z, SgbBorder
     xor a                   ; look again at the first screen (palettes), whatever we found
     ld [wSgbFound], a
-ENDC
 .start:
     ld sp, $FFFE
     ld hl, StartStub
@@ -204,7 +204,6 @@ StartStub:
     jp $0150
 StartStubEnd:
 
-IF DEF(SGB_BORDER)
 ; The border goes through VRAM: the SGB copies what the screen shows, a
 ; frame after the packet (tiles: CHR_TRN; map and palette: PCT_TRN).
 ; The TV keeps the last picture meanwhile (MASK_EN freeze).
@@ -323,7 +322,6 @@ SgbChrTrn:                  ; border tiles $00-$7F
     db $99, $00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 SgbPctTrn:
     db $A1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-ENDC
 
 ; About 4 frames: the SGB reads a packet only that often.
 SgbWait:

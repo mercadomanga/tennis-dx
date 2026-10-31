@@ -1,4 +1,4 @@
-; Tennis DX - Game Boy Color colorization of Tennis (Nintendo, 1989)
+; Tennis DX - Game Boy Color and Super Game Boy colours for Tennis (Nintendo, 1989)
 ;
 ; Build: make   (needs RGBDS 0.8, Python 3 and the original ROM as baserom.gb)
 

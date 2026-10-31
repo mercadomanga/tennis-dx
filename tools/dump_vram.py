@@ -7,7 +7,7 @@
 
 The game keeps its graphics compressed, so they are read from an emulator
 (needs pyboy) after the title screen and after the first serve. They come
-from your own copy of the game and are never stored in this repository.
+from your own copy of the game and are never kept with the source.
 Tiles $2E/$2F of the score board animate, so their snapshot depends on the
 frame; gen_data.py does not use them."""
 import os

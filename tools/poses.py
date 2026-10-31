@@ -10,7 +10,7 @@ pixel is kept as the palette slot that draws it (OBJ palette, colour), so
 the sheet shows each pose in the colours of tools/palettes.py.
 
 The sheet shows the game's own graphics: it is written to build/ and is
-not part of the repository. Needs pyboy and pillow."""
+not kept with the source. Needs pyboy and pillow."""
 import random
 import sys
 
