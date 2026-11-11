@@ -166,6 +166,10 @@ SECTION "OvlROM", ROMX, BANK[2]
 OvlROM:
 LOAD "OvlRAM", WRAMX[wOvlRAM]
 OvlVBlank::
+    ld a, [wBlank]          ; screen still white (BlankCGB / BlankDMG)
+    and a
+    jp nz, .blank
+.notblank:
     ld a, [wCardTodo]       ; palette / strip work that OvlEnd asked for
     and a
     jp nz, .todo
@@ -214,6 +218,49 @@ ENDR
 .left:
     MarioBody 3
     jp hOAMDMA
+
+; Count down the white frames; at 0 give the screen its colours.
+.blank:
+    dec a
+    ld b, a
+    and $7F
+    ld a, b
+    jr z, .unblank
+    ld [wBlank], a
+    jp .notblank
+.unblank:
+    xor a
+    ld [wBlank], a
+    ld hl, wPalBuf
+    bit 7, b
+    jr z, .cgbpals
+    ld a, [hl+]
+    ldh [rBGP], a
+    ld a, [hl+]
+    ldh [rOBP0], a
+    ld a, [hl]
+    ldh [rOBP1], a
+    jp .notblank
+.cgbpals:
+    ld c, LOW(rBCPS)
+    call .pals
+    ld c, LOW(rOCPS)
+    call .pals
+    jp .notblank
+.pals:                      ; 64 bytes from hl to palette RAM, c = xCPS
+    ld a, BCPSF_AUTOINC
+    ldh [c], a
+    inc c
+    ld b, 4
+.pal16:
+REPT 16
+    ld a, [hl+]
+    ldh [c], a
+ENDR
+    dec b
+    jr nz, .pal16
+    AuditVBlank             ; the last write still in VBlank: all of them were
+    ret
 
 ; Work OvlEnd asked for: only VBlank lets us touch palettes and the map.
 .todo:

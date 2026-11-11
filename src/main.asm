@@ -11,4 +11,5 @@ INCLUDE "colorize.asm"
 INCLUDE "vblank.asm"
 
 ASSERT wOvlRAM + (OvlROMEnd - OvlROM) <= $DD00, "VBlank routine runs into the game's WRAM"
+ASSERT wOvlBuf + OVL_STATIC_MAX * 4 <= wOvlRAM, "OVL_STATIC buffer runs into the VBlank routine"
 ASSERT LOW(BLK_LISTS) == $80 && HIGH(BLK_LISTS) == 3, "screen block layout changed"

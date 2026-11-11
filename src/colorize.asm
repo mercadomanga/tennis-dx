@@ -39,6 +39,7 @@ ENDC
     call IsCGB
     jr nz, .cgb
     call DmgScreen          ; DMG / Super Game Boy (sprite tables stay 0)
+    call BlankDMG
     jr .done
 .cgb:
 
@@ -69,10 +70,68 @@ ENDC
     call LoadStaticSprites
     xor a
     ldh [rVBK], a
+    call BlankCGB
 .done:
     pop hl
     pop de
     pop bc
+    ret
+
+; The game turns the LCD on before it has placed this screen's sprites, scroll
+; and window text: for two frames it shows what was left there the last time
+; (the players crossing on the score board, the court's opening pan...).
+; So the screen starts white and OvlVBlank gives the colours back after
+; BLANK_VBLANKS VBlanks. CGB: the palettes go to wPalBuf (LCD off: palette
+; RAM can be read; reads do not auto-increment) and every colour is white.
+BlankCGB:
+    ld hl, wPalBuf
+    ld c, LOW(rBCPS)
+    call .save
+    ld c, LOW(rOCPS)
+    call .save
+    ld a, BLANK_VBLANKS
+    ld [wBlank], a
+    ret
+.save:
+    ld b, 0
+.read:
+    ld a, b
+    ldh [c], a
+    inc c
+    ldh a, [c]
+    ld [hl+], a
+    dec c
+    inc b
+    bit 6, b
+    jr z, .read
+    ld a, BCPSF_AUTOINC     ; = OCPSF_AUTOINC
+    ldh [c], a
+    inc c
+    ld b, 32
+.white:
+    ld a, LOW(WHITE_555)
+    ldh [c], a
+    ld a, HIGH(WHITE_555)
+    ldh [c], a
+    dec b
+    jr nz, .white
+    ret
+
+; DMG / Super Game Boy: BGP, OBP0, OBP1 to wPalBuf, all three white.
+BlankDMG:
+    ld hl, wPalBuf
+    ldh a, [rBGP]
+    ld [hl+], a
+    ldh a, [rOBP0]
+    ld [hl+], a
+    ldh a, [rOBP1]
+    ld [hl], a
+    xor a
+    ldh [rBGP], a
+    ldh [rOBP0], a
+    ldh [rOBP1], a
+    ld a, $80 | BLANK_VBLANKS
+    ld [wBlank], a
     ret
 
 ; z = DMG (VBK reads $FF there), nz = CGB
@@ -446,6 +505,7 @@ InstallOvlRoutine:
     ld a, BLANK_TILE
     ld [wZoneTile], a       ; (the empty spot reads as floor either way)
     xor a
+    ld [wBlank], a
     ld hl, wOvlSlot
 .clear:
     ld [hl+], a

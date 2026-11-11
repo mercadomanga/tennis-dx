@@ -30,7 +30,7 @@ DEF hBusy           EQU $FF8C   ; non-zero while the VBlank handler runs (it is 
 
 DEF wObjPal0        EQU $D000   ; [256] sprite tile -> CGB attr bits 0-3 (OBP0 sprites)
 DEF wObjPal1        EQU $D100   ; [256] same for OBP1 sprites
-DEF wOvlRAM         EQU $D600   ; VBlank overlay routine (copied from ROM)
+DEF wOvlRAM         EQU $D560   ; VBlank overlay routine (copied from ROM), right after wOvlBuf
 DEF wCardMask       EQU $D2FA   ; FAULT / OUT card: rows of the portrait drawn as sprites (bits 0-2), 0 = none
 DEF wCardWX         EQU $D2FB   ; window x they were drawn for
 ; VRAM_AUDIT builds only (make audit): counters of writes the PPU could drop
@@ -43,6 +43,10 @@ DEF SGB_NO          EQU $A5
 DEF wZoneTile       EQU $D2F4   ; dotted floor tile of this court (CourtTexture)
 DEF wZoneRows       EQU $D2F5   ; rows 11-15 (bits 0-4) of Mario's empty spot to dot, 0 = none
 DEF wZoneCol        EQU $D2F6   ; first column of that spot once known, 0 = not yet
+DEF wBlank          EQU $D2F7   ; screen kept white: VBlanks left (bits 0-6), bit 7 = DMG / SGB
+DEF BLANK_VBLANKS   EQU 4       ; the game shows the last screen's leftovers until then
+DEF WHITE_555       EQU $7FFF   ; CGB white (what the LCD shows while off)
+DEF wPalBuf         EQU $D200   ; [128] the screen's CGB palettes (BG, OBJ) / [3] BGP, OBP0, OBP1
 DEF wOvlLim         EQU $D2F8   ; court overlay: sprites right of this x are hidden by the window
 DEF wCardTodo       EQU $D2F9   ; TODO_xx bits: work for the next OvlVBlank
 DEF TODO_PALCARD    EQU 0       ; load the card's colours into OBJ palette 5

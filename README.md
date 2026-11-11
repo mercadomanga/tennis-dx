@@ -8,6 +8,8 @@ Una sola ROM vale para todo:
 - **Super Game Boy y SGB2:** una paleta por nivel y el borde de Game Boy clásica, con los mismos arreglos que en la Game Boy clásica.
 - **Game Boy clásica:** como el cartucho original, con dos arreglos: los ojos y las zapatillas del rival ya no son transparentes, y el cartel de FAULT / OUT llena su franja derecha.
 
+En las tres, al cambiar entre el marcador y la pista ya no asoman durante un instante restos de la pantalla anterior (jugadores, textos, la grada), un fallo del juego original: la pantalla espera en blanco unos fotogramas hasta que todo está en su sitio.
+
 ## Qué incluye
 
 - Una pista por nivel, de la más lenta a la más rápida: tierra batida, pista dura, moqueta y hierba. La tierra batida y la hierba llevan el suelo punteado.
