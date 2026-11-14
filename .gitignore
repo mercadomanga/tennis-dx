@@ -5,3 +5,4 @@ baserom.gb
 *.gbc
 __pycache__/
 .ruff_cache/
+tools/data/sgb_border.png

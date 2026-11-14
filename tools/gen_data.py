@@ -720,8 +720,14 @@ def emit_sgb(f):
 
 def emit_sgb_border(f):
     """Super Game Boy border from tools/data/sgb_border.png (256 x 224, at most
-    15 colours plus magenta for the game's window)."""
+    15 colours plus magenta for the game's window). Optional: without the file
+    the ROM sends no border and the Super Game Boy keeps its own."""
     path = os.path.join(DATA, 'sgb_border.png')
+    if not os.path.exists(path):
+        f.write('\n; Super Game Boy border: none (no tools/data/sgb_border.png)\n')
+        f.write('DEF SGB_BORDER EQU 0\n')
+        f.write('SECTION "SgbBorder", ROMX, BANK[3]\nSgbBorderTiles:\n')
+        return
     from PIL import Image
     im = Image.open(path).convert('RGB')
     assert im.size == (256, 224), 'the border must be 256 x 224'
@@ -759,6 +765,7 @@ def emit_sgb_border(f):
             hi += b[2:4]
         return lo + hi
     f.write(f'\n; Super Game Boy border: {len(tiles)} tiles, {len(colours)} colours (palette 4)\n')
+    f.write('DEF SGB_BORDER EQU 1\n')
     f.write(f'DEF SGB_BORDER_TILES EQU {len(tiles)}\n')
     f.write('SECTION "SgbBorder", ROMX, BANK[3]      ; read through FarCopy (colorize.asm)\nSgbBorderTiles:\n')
     for t in tiles:

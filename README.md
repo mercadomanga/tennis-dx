@@ -5,7 +5,7 @@ Versión a color del *Tennis* de Game Boy (Nintendo, 1989), al estilo de las edi
 Una sola ROM vale para todo:
 
 - **Game Boy Color:** la versión DX a color.
-- **Super Game Boy y SGB2:** una paleta por nivel y el borde de Game Boy clásica, con los mismos arreglos que en la Game Boy clásica.
+- **Super Game Boy y SGB2:** una paleta por nivel (y un borde propio, si se lo das), con los mismos arreglos que en la Game Boy clásica.
 - **Game Boy clásica:** como el cartucho original, con dos arreglos: los ojos y las zapatillas del rival ya no son transparentes, y el cartel de FAULT / OUT llena su franja derecha.
 
 En las tres, al cambiar entre el marcador y la pista ya no asoman durante un instante restos de la pantalla anterior (jugadores, textos, la grada), un fallo del juego original: la pantalla espera en blanco unos fotogramas hasta que todo está en su sitio.
@@ -34,6 +34,6 @@ make dist     # dist/: ROM, parche y código
 
 - Colores de Game Boy Color: `tools/palettes.py`.
 - Paletas de Super Game Boy: `SGB_*` en `tools/palettes.py`.
-- Borde de Super Game Boy: `tools/data/sgb_border.png` (256 × 224, 15 colores como máximo, magenta en la ventana del juego).
+- Borde de Super Game Boy (opcional, no se incluye): `tools/data/sgb_border.png` (256 × 224, 15 colores como máximo, magenta en la ventana del juego). Sin él, el Super Game Boy muestra su borde de siempre.
 
 Los gráficos del juego no se guardan con el código: al compilar se leen de `baserom.gb`.

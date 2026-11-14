@@ -30,7 +30,7 @@ VRAM := build/vram/spr_court.bin build/vram/spr_board.bin build/vram/bg_court.bi
 $(VRAM) &: baserom.gb build/baserom.ok tools/dump_vram.py
 	$(PY) tools/dump_vram.py baserom.gb build/vram
 
-build/data.inc: tools/gen_data.py tools/palettes.py tools/art/dx_logo.py $(wildcard tools/data/*.json) tools/data/sgb_border.png $(VRAM)
+build/data.inc: tools/gen_data.py tools/palettes.py tools/art/dx_logo.py $(wildcard tools/data/*.json) $(wildcard tools/data/sgb_border.png) $(VRAM)
 	@mkdir -p build
 	$(PY) tools/gen_data.py $@ build/vram
 

@@ -283,7 +283,9 @@ PowerOn:
     xor a
     ld [wSgbFound], a       ; RAM is random at power on
     call FindSgb
+IF SGB_BORDER
     call z, SgbBorder
+ENDC
     xor a                   ; look again at the first screen (palettes), whatever we found
     ld [wSgbFound], a
 .start:
@@ -309,6 +311,7 @@ StartStubEnd:
 ; The border goes through VRAM: the SGB copies what the screen shows, a
 ; frame after the packet (tiles: CHR_TRN; map and palette: PCT_TRN).
 ; The TV keeps the last picture meanwhile (MASK_EN freeze).
+IF SGB_BORDER
 SgbBorder:
     ld hl, SgbMaskFreeze
     call SgbSend
@@ -363,6 +366,7 @@ SgbBorder:
     ld hl, SgbMaskOff
     call SgbSend
     jp SgbWait
+ENDC
 
 ; In: hl -> packet. Shows the prepared VRAM, sends the packet, waits, LCD off.
 SgbTransfer:
