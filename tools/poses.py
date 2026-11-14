@@ -171,10 +171,10 @@ def sheet(poses, colour, cols=12, scale=4, pad=6):
     img = Image.new('RGB', (cols * cw * scale, height * scale), '#5C6A70')
     d = ImageDraw.Draw(img)
     y = 0
-    names = {('court', 0): 'Pista: tú', ('court', 1): 'Pista: rival',
-             ('board', 0): 'Presentación: tú', ('board', 1): 'Presentación: rival'}
+    names = {('court', 0): 'Court: you', ('court', 1): 'Court: opponent',
+             ('board', 0): 'Title screen: you', ('board', 1): 'Title screen: opponent'}
     for scr, who, items in blocks:
-        d.text((10, y * scale + 12), f'{names[scr, who]} ({len(items)} posturas)', fill='white', font=font)
+        d.text((10, y * scale + 12), f'{names[scr, who]} ({len(items)} poses)', fill='white', font=font)
         y += title
         for n, g in enumerate(items):
             ox = (n % cols) * cw + (cw - len(g[0])) // 2

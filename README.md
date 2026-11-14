@@ -1,39 +1,39 @@
 # Tennis DX
 
-Versión a color del *Tennis* de Game Boy (Nintendo, 1989), al estilo de las ediciones "DX". El juego es el original: mismas reglas y mismos gráficos; solo cambia el color. Uso privado.
+A colour version of Game Boy *Tennis* (Nintendo, 1989), in the style of the "DX" editions. The game is the original: same rules and same graphics; only the colour changes. For private use.
 
-Una sola ROM vale para todo:
+One ROM for everything:
 
-- **Game Boy Color:** la versión DX a color.
-- **Super Game Boy y SGB2:** una paleta por nivel (y un borde propio, si se lo das), con los mismos arreglos que en la Game Boy clásica.
-- **Game Boy clásica:** como el cartucho original, con dos arreglos: los ojos y las zapatillas del rival ya no son transparentes, y el cartel de FAULT / OUT llena su franja derecha.
+- **Game Boy Color:** the DX version in colour.
+- **Super Game Boy and SGB2:** one palette per level (and a custom border, if you provide one), with the same fixes as on the original Game Boy.
+- **Original Game Boy:** like the original cartridge, with two fixes: the opponent's eyes and shoes are no longer transparent, and the FAULT / OUT sign fills its right-hand strip.
 
-En las tres, al cambiar entre el marcador y la pista ya no asoman durante un instante restos de la pantalla anterior (jugadores, textos, la grada), un fallo del juego original: la pantalla espera en blanco unos fotogramas hasta que todo está en su sitio.
+On all three, switching between the scoreboard and the court no longer flashes leftovers from the previous screen (players, text, the stands), a bug in the original game: the screen stays white for a few frames until everything is in place.
 
-## Qué incluye
+## What's included
 
-- Una pista por nivel, de la más lenta a la más rápida: tierra batida, pista dura, moqueta y hierba. La tierra batida y la hierba llevan el suelo punteado.
-- La pantalla de presentación con el suelo y la pared de la pista que se va a jugar.
-- Color en los jugadores, el público, Mario árbitro, el marcador, la pelota y el cartel de FAULT / OUT.
-- Partidas de 2 jugadores por cable link con los mismos colores en las dos consolas.
+- One court per level, from slowest to fastest: clay, hard court, carpet and grass. Clay and grass get a dotted surface.
+- The title screen shows the floor and wall of the court about to be played.
+- Colour on the players, the crowd, Mario the umpire, the scoreboard, the ball and the FAULT / OUT sign.
+- 2-player matches over the link cable, with the same colours on both consoles.
 
-## Jugar
+## Playing
 
-Aplica `tennis_dx.ips` a tu volcado de *Tennis (World)*, SHA1 `ec45a932fb3fc21394fef5e27e7fe9eccd0c7f70`. Funciona en emuladores (SameBoy, BGB, Emulicious, mGBA) y en consola con un flashcart: la ROM usa el chip MBC5 y ocupa 64 KiB. En BGB, para ver la versión de Super Game Boy: *Options → System → GB type: SGB*.
+Apply `tennis_dx.ips` to your dump of *Tennis (World)*, SHA1 `ec45a932fb3fc21394fef5e27e7fe9eccd0c7f70`. It works in emulators (SameBoy, BGB, Emulicious, mGBA) and on hardware with a flash cart: the ROM uses the MBC5 chip and takes 64 KiB. In BGB, to see the Super Game Boy version: *Options → System → GB type: SGB*.
 
-## Compilar
+## Building
 
-Necesitas RGBDS 0.8, Python 3 (`pip install -r requirements.txt`) y la ROM original con el nombre `baserom.gb`.
+You need RGBDS 0.8, Python 3 (`pip install -r requirements.txt`) and the original ROM named `baserom.gb`.
 
 ```
 make          # build/tennis_dx.gbc
 make ips      # build/tennis_dx.ips
-make test     # pruebas
-make dist     # dist/: ROM, parche y código
+make test     # tests
+make dist     # dist/: ROM, patch and source
 ```
 
-- Colores de Game Boy Color: `tools/palettes.py`.
-- Paletas de Super Game Boy: `SGB_*` en `tools/palettes.py`.
-- Borde de Super Game Boy (opcional, no se incluye): `tools/data/sgb_border.png` (256 × 224, 15 colores como máximo, magenta en la ventana del juego). Sin él, el Super Game Boy muestra su borde de siempre.
+- Game Boy Color colours: `tools/palettes.py`.
+- Super Game Boy palettes: `SGB_*` in `tools/palettes.py`.
+- Super Game Boy border (optional, not included): `tools/data/sgb_border.png` (256 × 224, at most 15 colours, magenta for the game's window). Without it, the Super Game Boy shows its usual border.
 
-Los gráficos del juego no se guardan con el código: al compilar se leen de `baserom.gb`.
+The game's graphics are not stored with the source: they are read from `baserom.gb` at build time.
