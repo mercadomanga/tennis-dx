@@ -21,6 +21,8 @@ DEF SprBuild2_Attr  EQU $3082   ; builder 2: attribute write
 DEF VBlank_DMACall  EQU $01FC   ; "call OAM DMA" inside the VBlank handler
 DEF VBlank_End      EQU $0237   ; last thing the handler does: "xor a, ldh [hBusy], a"
 DEF hGameState      EQU $FF8B   ; 1 = the rally
+DEF wWinPending     EQU $C0C0   ; non-zero: the next VBlank copies wWinBuf to the window map
+DEF wWinBuf         EQU $C0C1   ; [25] the window's 5 x 5 tiles, as the game wants them (score box, FAULT / OUT card)
 DEF wLevel          EQU $C0DF   ; level 1-4: chosen in the menu (a win preselects the next one)
 DEF hBusy           EQU $FF8C   ; non-zero while the VBlank handler runs (it is not re-entrant)
 

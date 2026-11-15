@@ -407,6 +407,25 @@ OvlEnd::
     ldh a, [hShadowLCDC]
     bit LCDCB_WINON, a
     jr z, .have
+    ld a, [wWinPending]     ; a new window is on its way: the next VBlank draws it, right
+    and a                   ; after DMA'ing these sprites, so look at what it will show
+    jr z, .onmap
+    ld a, [wWinBuf + 4 * 5 + 1]
+    cp CARD_TILE
+    jr nz, .buf3
+    set 2, d
+.buf3:
+    ld a, [wWinBuf + 3 * 5 + 1]
+    cp CARD_MID_TILE
+    jr nz, .buf2
+    set 1, d
+.buf2:
+    ld a, [wWinBuf + 2 * 5 + 1]
+    cp CARD_FACE_TILE
+    jr nz, .have
+    set 0, d
+    jr .have
+.onmap:
     ReadVRAM _SCRN1 + 4 * 32 + 1
     cp CARD_TILE
     jr nz, .not4

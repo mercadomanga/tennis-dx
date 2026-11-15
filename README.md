@@ -14,7 +14,7 @@ On all three, switching between the scoreboard and the court no longer flashes l
 
 - One court per level, from slowest to fastest: clay, hard court, carpet and grass. Clay and grass get a dotted surface.
 - The title screen shows the floor and wall of the court about to be played.
-- Colour on the players, the crowd, Mario the umpire, the scoreboard, the ball and the FAULT / OUT sign.
+- Colour on the players, the crowd, Mario the umpire, the scoreboard, the ball and the FAULT / OUT sign. The sign comes up with its colours on its very first frame.
 - 2-player matches over the link cable, with the same colours on both consoles.
 
 ## Playing
