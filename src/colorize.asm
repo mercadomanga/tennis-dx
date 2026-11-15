@@ -146,7 +146,8 @@ IsCGB:
 ; DMG and Super Game Boy (the game's own shades). On the court, the CPU's
 ; eyes and shoes get their white: they were transparent, and its sprite
 ; palette (OBP1) shows colour 2 as white (only in the tiles your player never
-; uses: your palette, OBP0, has no white). And the strip right of the
+; uses: your palette, OBP0, has no white; not on the second console of a
+; 2-player game, which draws those tiles with OBP0). And the strip right of the
 ; FAULT / OUT card (OVL_DMG). On a Super Game Boy,
 ; also the palette of the current level for the whole screen (one PAL01
 ; packet; the attributes stay as the SGB starts: palette 0 everywhere).
@@ -156,7 +157,11 @@ DmgScreen:
     jr nz, .sgb
     ld a, OVL_DMG
     ld [wOvlMode], a
-    ld hl, DmgWhiteCourt
+    ldh a, [hLinkRole]
+    and 3
+    cp 3
+    jr z, .sgb              ; second console of a 2-player game: the players swap
+    ld hl, DmgWhiteCourt    ; palettes there, and colour 2 is dark in OBP0
     call DmgWhite
 .sgb:
     call FindSgb

@@ -10,6 +10,7 @@ DEF hShadowWY       EQU $FFAC   ; copied to WY later in the same VBlank
 ; (rLCDC itself has the window bit cleared mid-frame by the game's STAT
 ; handler, so VBlank code must look at hShadowLCDC.)
 DEF hSprXorAttr     EQU $FFEB   ; attribute XOR used by sprite builder 1
+DEF hLinkRole       EQU $FF96   ; bits 0-1 = 3: the second console of a 2-player game
 DEF wShadowOAM      EQU $DE00   ; copied to OAM by DMA every VBlank
 DEF wOAMNext        EQU $DEA0   ; next free byte in wShadowOAM (game's fill pointer)
 DEF hOAMDMA         EQU $FF80   ; game's OAM DMA routine in HRAM

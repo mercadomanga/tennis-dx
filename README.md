@@ -6,7 +6,7 @@ One ROM for everything:
 
 - **Game Boy Color:** the DX version in colour.
 - **Super Game Boy and SGB2:** one palette per level (and a custom border, if you provide one), with the same fixes as on the original Game Boy.
-- **Original Game Boy:** like the original cartridge, with two fixes: the opponent's eyes and shoes are no longer transparent, and the FAULT / OUT sign fills its right-hand strip.
+- **Original Game Boy:** like the original cartridge, with two fixes: the opponent's eyes and shoes are no longer transparent (except on the second console of a 2-player game, whose palette for them has no white), and the FAULT / OUT sign fills its right-hand strip.
 
 On all three, switching between the scoreboard and the court no longer flashes leftovers from the previous screen (players, text, the stands), a bug in the original game: the screen stays white for a few frames until everything is in place. On Game Boy Color, the last frame of each screen is shown whole too, sprites included.
 
