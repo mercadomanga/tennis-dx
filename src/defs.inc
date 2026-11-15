@@ -14,6 +14,8 @@ DEF wShadowOAM      EQU $DE00   ; copied to OAM by DMA every VBlank
 DEF wOAMNext        EQU $DEA0   ; next free byte in wShadowOAM (game's fill pointer)
 DEF hOAMDMA         EQU $FF80   ; game's OAM DMA routine in HRAM
 
+DEF ScreenOff_LCDC  EQU $0175   ; "ld a, $80" before the game turns the LCD off to change screens
+DEF hScreenOffLCDC  EQU $FFFE   ; what goes to LCDC there: the one HRAM byte the game never clears or uses
 DEF LCDOn_Orig      EQU $2F6F   ; "turn LCD on" routine we hook
 DEF LCDOn_Resume    EQU $2F73   ; ...and where we resume it
 DEF SprBuild1_Tile  EQU $0096   ; builder 1: tile + attribute writes

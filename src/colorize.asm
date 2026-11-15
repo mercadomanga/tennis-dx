@@ -42,7 +42,8 @@ ENDC
     call BlankDMG
     jr .done
 .cgb:
-
+    ld a, LCDCF_ON | LCDCF_OBJON | LCDCF_BGON
+    ldh [hScreenOffLCDC], a ; leaving this screen: its last frame whole (bank0.asm)
     call DetectScreen       ; b = block page
     call LoadPalettes
     ld a, b
@@ -289,6 +290,8 @@ ENDC
     xor a                   ; look again at the first screen (palettes), whatever we found
     ld [wSgbFound], a
 .start:
+    ld a, LCDCF_ON
+    ldh [hScreenOffLCDC], a ; what the game writes when it leaves a screen
     ld sp, $FFFE
     ld hl, StartStub
     ld de, _RAM

@@ -18,6 +18,7 @@ ALLOWED = [
     (0x0147, 0x0149),   # cartridge type, ROM size
     (0x014B, 0x014C),   # old licensee $33: the SGB flag counts
     (0x014D, 0x0150),   # checksums
+    (0x0175, 0x0177),   # leaving a screen: the value for LCDC comes from HRAM
     (0x01FC, 0x01FF),   # VBlank: OAM DMA call
     (0x0237, 0x023A),   # VBlank: end of the handler
     (0x2F6F, 0x2F72),   # LCD on

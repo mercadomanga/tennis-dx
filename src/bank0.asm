@@ -84,7 +84,19 @@ SECTION "rom0_0100", ROM0[$0100]
     jp LCDOnHook1           ; sees the boot stack), then the game's own start at $0150
 
 SECTION "rom0_0104", ROM0[$0104]
-    INCBIN "baserom.gb", $0104, VBlank_DMACall - $0104
+    INCBIN "baserom.gb", $0104, ScreenOff_LCDC - $0104
+
+; Leaving a screen, the game writes $80 to LCDC (background and sprites off)
+; and then waits for VBlank to turn the LCD off. A Game Boy Color ignores
+; "background off": the rest of that frame showed the screen without its
+; sprites. There the value comes with both on (window off), so the frame ends
+; whole; on a DMG / Super Game Boy, and the first time after power on (OAM
+; is not set up yet), it is the game's $80. See hScreenOffLCDC.
+SECTION "rom0_ScreenOff", ROM0[ScreenOff_LCDC]
+    ldh a, [hScreenOffLCDC]
+
+SECTION "rom0_0178", ROM0[ScreenOff_LCDC + 2]
+    INCBIN "baserom.gb", ScreenOff_LCDC + 2, VBlank_DMACall - (ScreenOff_LCDC + 2)
 
 SECTION "rom0_VBlankDMA", ROM0[VBlank_DMACall]
     call OvlVBlank          ; Mario's overlay sprites, then the OAM DMA
